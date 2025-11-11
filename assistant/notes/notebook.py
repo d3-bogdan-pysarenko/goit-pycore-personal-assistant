@@ -5,3 +5,7 @@ Responsibilities:
 - Store, retrieve, edit, and delete notes.
 - Support search and filter operations (e.g., by keyword or tag).
 """
+
+
+class Notebook:
+    pass

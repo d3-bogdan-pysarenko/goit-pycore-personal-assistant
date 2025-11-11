@@ -6,3 +6,7 @@ Responsibilities:
 - Provide search, delete, and iteration methods.
 - Include the `get_upcoming_birthdays()` function.
 """
+
+
+class AddressBook:
+    pass
