@@ -24,6 +24,20 @@ from assistant.storage_manager import load_data, save_data
 # Command registry (populated by register_* functions)
 COMMANDS = {}
 
+# Rotating phrases for the `hello` command
+GREETINGS = [
+    "Hello! How can I help you?",
+    "Hi there! What can I do for you today?",
+    "Greetings! Ready when you are."
+]
+
+GREETING_JOKES = [
+    "Why did the computer show up at work late? It had a hard drive.",
+    "I would tell you a UDP joke, but you might not get it.",
+    "There are 10 types of people: those who understand binary and those who don’t.",
+    "I tried to catch some fog earlier. I mist."
+]
+
 
 def show_help():
     """Display help with all commands, parameters, and descriptions."""
@@ -124,6 +138,12 @@ def main():
     else:
         completer = None
 
+    # State for tracking consecutive `hello` commands
+    last_command_was_hello = False
+    hello_streak = 0
+    greet_index = 0
+    joke_index = 0
+
     try:
         while True:
             if is_tty:
@@ -146,12 +166,31 @@ def main():
                 persist()
                 break
 
-
             elif cmd_enum == Command.General.HELLO:
-                print("How can I help you?")
+                # Maintain a streak counter for consecutive `hello` calls
+                if last_command_was_hello:
+                    hello_streak += 1
+                else:
+                    hello_streak = 1
+
+                # First 3 consecutive hellos → rotate through greetings; afterwards → jokes
+                if hello_streak <= 3:
+                    phrase = GREETINGS[greet_index % len(GREETINGS)] if GREETINGS else "Hello!"
+                    greet_index = (greet_index + 1) % max(1, len(GREETINGS))
+                else:
+                    phrase = GREETING_JOKES[joke_index % len(GREETING_JOKES)] if GREETING_JOKES else "Hello again!"
+                    joke_index = (joke_index + 1) % max(1, len(GREETING_JOKES))
+
+                print(phrase)
+                last_command_was_hello = True
                 continue
 
             elif cmd_enum == Command.General.HELP:
+                # Reset the streak on a different valid command
+                last_command_was_hello = False
+                hello_streak = 0
+                greet_index = 0
+                joke_index = 0
                 show_help()
                 continue
 
@@ -160,6 +199,11 @@ def main():
                 if handler is None:
                     print("⚠️ Command not implemented yet.")
                 else:
+                    # Any valid non-hello command resets the streak
+                    last_command_was_hello = False
+                    hello_streak = 0
+                    greet_index = 0
+                    joke_index = 0
                     if isinstance(cmd_enum, Command.Contacts):
                         result = handler(args, contacts)
                     elif isinstance(cmd_enum, Command.Notes):
@@ -171,6 +215,11 @@ def main():
                         print(str(result).rstrip())
             else:
                 # Only report invalid for non-empty commands
+                # Reset the hello streak on any different (even unknown) command
+                last_command_was_hello = False
+                hello_streak = 0
+                greet_index = 0
+                joke_index = 0
                 print("Unknown command. Type 'help' to see available commands.")
     finally:
         # Fallback persistence in case of unexpected exceptions

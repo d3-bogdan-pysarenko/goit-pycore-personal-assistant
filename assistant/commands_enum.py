@@ -22,24 +22,24 @@ class Command:
     class Contacts(str, Enum):
         """Contact management commands."""
         ADD = "add"
-        CHANGE = "change"
-        PHONE = "phone"
-        ALL = "all"
-        ADD_BIRTHDAY = "add-birthday"
-        SHOW_BIRTHDAY = "show-birthday"
-        BIRTHDAYS = "birthdays"
+        PHONE = "add-phone"
         ADD_EMAIL = "add-email"
+        ADD_BIRTHDAY = "add-birthday"
         ADD_ADDRESS = "add-address"
-        DELETE = "delete"
+        CHANGE = "change-phone"
+        BIRTHDAYS = "birthdays"
+        SHOW_BIRTHDAY = "birthday"
+        ALL = "all"
         SEARCH = "search"
+        DELETE = "delete"
 
     class Notes(str, Enum):
         """Note management commands."""
         ADD_NOTE = "add-note"
         EDIT_NOTE = "edit-note"
-        DELETE_NOTE = "delete-note"
-        SEARCH_NOTE = "search-note"
         SHOW_NOTES = "all-notes"
+        SEARCH_NOTE = "search-note"
+        DELETE_NOTE = "delete-note"
 
     class General(str, Enum):
         """General commands."""
