@@ -135,6 +135,38 @@ def add_address(args, book):
     record.add_address(address)
     return f"Address for {name} has been added."
 
+@input_error
+def search_contacts(self, query: str) -> list:
+    """Search contacts by name, phone, or email."""
+    query_lower = query.lower()
+    results = []
+
+    for contact in self.data.values():
+        found = False
+
+        # --- name ---
+        if query_lower in contact.name.value.lower():
+            found = True
+
+        # --- phones ---
+        if not found:
+            for phone in contact.phones:
+                if query in phone:
+                    found = True
+                    break
+
+        # --- emails ---
+        if not found:
+            for email in contact.emails:
+                if query_lower in email.lower():
+                    found = True
+                    break
+
+        if found:
+            results.append(contact)
+
+    return results
+
 
 def register_contact_commands(commands):
     """Register commands in the main command dispatcher."""
@@ -145,5 +177,6 @@ def register_contact_commands(commands):
     commands[Command.Contacts.ADD_BIRTHDAY] = add_birthday
     commands[Command.Contacts.SHOW_BIRTHDAY] = show_birthday
     commands[Command.Contacts.BIRTHDAYS] = birthdays
+    commands[Command.Contacts.SEARCH] = search_contacts
     commands[Command.Contacts.ADD_EMAIL] = add_email
     commands[Command.Contacts.ADD_ADDRESS] = add_address

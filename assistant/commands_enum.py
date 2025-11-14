@@ -18,7 +18,7 @@ class Command:
         Command.Notes.EDIT_NOTE
         Command.General.EXIT
     """
-    
+
     class Contacts(str, Enum):
         """Contact management commands."""
         ADD = "add"
@@ -30,7 +30,8 @@ class Command:
         BIRTHDAYS = "birthdays"
         ADD_EMAIL = "add-email"
         ADD_ADDRESS = "add-address"
-    
+        SEARCH = "search-contacts"
+
     class Notes(str, Enum):
         """Note management commands."""
         ADD_NOTE = "add-note"
@@ -38,7 +39,7 @@ class Command:
         DELETE_NOTE = "delete-note"
         SEARCH_NOTE = "search-note"
         SHOW_NOTES = "show-notes"
-    
+
     class General(str, Enum):
         """General commands."""
         HELLO = "hello"
@@ -51,7 +52,7 @@ class CommandHelp:
     """Command help information including parameters and description."""
     params: str
     description: str
-    
+
     def format(self, command_name: str, width: int = 40) -> str:
         """Format command help for display."""
         cmd_with_params = f"{command_name} {self.params}".strip()
@@ -89,6 +90,10 @@ COMMAND_HELP = {
         params="[days]",
         description="Show upcoming birthdays (default: 7 days)"
     ),
+    Command.Contacts.SEARCH: CommandHelp(
+        params="<query>",
+        description="Search contacts by name, phone or email"
+    ),
     Command.Contacts.ADD_EMAIL: CommandHelp(
         params="<name> <email>",
         description="Add or update a contact's email"
@@ -97,7 +102,7 @@ COMMAND_HELP = {
         params="<name> <address>",
         description="Add or update a contact's address"
     ),
-    
+
     # Note commands
     Command.Notes.ADD_NOTE: CommandHelp(
         params="<title> <content>",
@@ -119,7 +124,7 @@ COMMAND_HELP = {
         params="",
         description="Show all notes"
     ),
-    
+
     # General commands
     Command.General.HELLO: CommandHelp(
         params="",

@@ -33,6 +33,7 @@ COMMANDS = {
     Command.Notes.DELETE_NOTE: None,
     Command.Notes.SEARCH_NOTE: None,
     Command.Notes.SHOW_NOTES: None,
+    Command.Contacts.SEARCH: None
 }
 
 
