@@ -21,6 +21,7 @@ from assistant.commands_enum import Command, COMMAND_HELP
 from assistant.notes.notebook import Notebook
 from assistant.storage_manager import load_data, save_data
 from prompt_toolkit.patch_stdout import patch_stdout
+from prompt_toolkit.shortcuts import CompleteStyle
 import os
 
 # Command registry (populated by register_* functions)
@@ -70,12 +71,11 @@ def show_help():
 
 
 def main():
-    print("Welcome to the Personal Assistant!")
+    print("\033[1;36mWelcome to the Personal Assistant!\033[0m")  # bold cyan
 
     def clear_screen():
         """Clear the terminal screen and scrollback buffer."""
         # ANSI escape sequences to clear scrollback (3J), move cursor home (H), and clear screen (2J)
-        # Works in most terminals including macOS Terminal.app, iTerm2, GNOME Terminal, etc.
         sys.stdout.write("\033[3J\033[H\033[2J")
         sys.stdout.flush()
 
@@ -93,7 +93,30 @@ def main():
     # Use prompt_toolkit only for interactive terminals to avoid warnings like
     # "Warning: Input is not a terminal (fd=0)."
     is_tty = sys.stdin.isatty() and sys.stdout.isatty()
-    session = PromptSession(reserve_space_for_menu=0) if is_tty else None
+    # Reserve some lines for the completion menu so there's always space at the
+    # bottom for hints. Make it configurable via PA_MENU_RESERVE. Default: 6.
+    reserve_env = os.environ.get("PA_MENU_RESERVE", "6")
+    try:
+        reserve_lines = int(reserve_env)
+    except ValueError:
+        reserve_lines = 6
+    if reserve_lines < 0:
+        reserve_lines = 0
+    if reserve_lines > 20:
+        reserve_lines = 20
+
+    session = (
+        PromptSession(
+            reserve_space_for_menu=reserve_lines,
+            complete_while_typing=True,
+            mouse_support=False,
+            enable_history_search=False,
+            # Use a menu style that adapts to space; in TTY it'll render nicely.
+            complete_style=CompleteStyle.MULTI_COLUMN if is_tty else CompleteStyle.READLINE_LIKE,
+        )
+        if is_tty
+        else None
+    )
 
     # Initialize in-memory data from persisted storage
     if isinstance(contacts_data, dict):
@@ -156,11 +179,11 @@ def main():
     try:
         while True:
             if is_tty:
-                with patch_stdout():
+                with patch_stdout(raw=True):
                     user_input = session.prompt('> ', completer=completer)
             else:
                 try:
-                    user_input = input('> ')
+                    user_input = input()
                 except EOFError:
                     break
 
