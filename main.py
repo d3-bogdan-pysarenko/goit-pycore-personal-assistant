@@ -20,6 +20,8 @@ from assistant.notes.commands import register_note_commands
 from assistant.commands_enum import Command, COMMAND_HELP
 from assistant.notes.notebook import Notebook
 from assistant.storage_manager import load_data, save_data
+from prompt_toolkit.patch_stdout import patch_stdout
+import os
 
 # Command registry (populated by register_* functions)
 COMMANDS = {}
@@ -70,6 +72,13 @@ def show_help():
 def main():
     print("Welcome to the Personal Assistant!")
 
+    def clear_screen():
+        """Clear the terminal screen and scrollback buffer."""
+        # ANSI escape sequences to clear scrollback (3J), move cursor home (H), and clear screen (2J)
+        # Works in most terminals including macOS Terminal.app, iTerm2, GNOME Terminal, etc.
+        sys.stdout.write("\033[3J\033[H\033[2J")
+        sys.stdout.flush()
+
     project_root = Path(__file__).resolve().parent
     data_dir = project_root / "data"
     contacts_path = data_dir / "contacts.json"
@@ -84,7 +93,7 @@ def main():
     # Use prompt_toolkit only for interactive terminals to avoid warnings like
     # "Warning: Input is not a terminal (fd=0)."
     is_tty = sys.stdin.isatty() and sys.stdout.isatty()
-    session = PromptSession() if is_tty else None
+    session = PromptSession(reserve_space_for_menu=0) if is_tty else None
 
     # Initialize in-memory data from persisted storage
     if isinstance(contacts_data, dict):
@@ -147,7 +156,8 @@ def main():
     try:
         while True:
             if is_tty:
-                user_input = session.prompt('Enter a command: ', completer=completer)
+                with patch_stdout():
+                    user_input = session.prompt('> ', completer=completer)
             else:
                 try:
                     user_input = input('> ')
@@ -192,6 +202,15 @@ def main():
                 greet_index = 0
                 joke_index = 0
                 show_help()
+                continue
+
+            elif cmd_enum == Command.General.CLEAR:
+                # Reset hello streak and clear the screen
+                last_command_was_hello = False
+                hello_streak = 0
+                greet_index = 0
+                joke_index = 0
+                clear_screen()
                 continue
 
             if cmd_enum in COMMANDS:

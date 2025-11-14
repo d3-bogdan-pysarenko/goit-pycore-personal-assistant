@@ -46,6 +46,7 @@ class Command:
         HELLO = "hello"
         HELP = "help"
         CLOSE = "close"
+        CLEAR = "clear"
 
 
 @dataclass
@@ -142,6 +143,10 @@ COMMAND_HELP = {
     Command.General.CLOSE: CommandHelp(
         params="",
         description="Close the assistant"
+    ),
+    Command.General.CLEAR: CommandHelp(
+        params="",
+        description="Clear the terminal screen"
     ),
 }
 
