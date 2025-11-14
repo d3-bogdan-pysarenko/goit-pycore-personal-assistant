@@ -26,6 +26,13 @@ class AddressBook:
         """Find a record by exact name."""
         return self.data.get(name)
 
+    def delete(self, name: str) -> bool:
+        """Delete a record by name. Returns True if deleted, False if missing."""
+        if name in self.data:
+            del self.data[name]
+            return True
+        return False
+
     # ---- Serialization helpers ----
     def to_dict(self) -> Dict[str, Any]:
         return {name: rec.to_dict() for name, rec in self.data.items()}

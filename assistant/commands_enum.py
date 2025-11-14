@@ -30,7 +30,8 @@ class Command:
         BIRTHDAYS = "birthdays"
         ADD_EMAIL = "add-email"
         ADD_ADDRESS = "add-address"
-        SEARCH = "search-contacts"
+        DELETE = "delete"
+        SEARCH = "search"
 
     class Notes(str, Enum):
         """Note management commands."""
@@ -38,7 +39,7 @@ class Command:
         EDIT_NOTE = "edit-note"
         DELETE_NOTE = "delete-note"
         SEARCH_NOTE = "search-note"
-        SHOW_NOTES = "show-notes"
+        SHOW_NOTES = "all-notes"
 
     class General(str, Enum):
         """General commands."""
@@ -101,6 +102,10 @@ COMMAND_HELP = {
     Command.Contacts.ADD_ADDRESS: CommandHelp(
         params="<name> <address>",
         description="Add or update a contact's address"
+    ),
+    Command.Contacts.DELETE: CommandHelp(
+        params="<name>",
+        description="Delete a contact by name"
     ),
 
     # Note commands

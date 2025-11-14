@@ -64,6 +64,10 @@ class Note:
         return note
     
     def __str__(self) -> str:
-        """String representation of the note."""
+        """String representation of the note.
+
+        Display the last updated date rather than the creation date.
+        """
         tags_str = f" [Tags: {', '.join(self.tags)}]" if self.tags else ""
-        return f"📝 {self.title}{tags_str}\n{self.content}\n📅 Created: {self.created_at[:10]}"
+        updated_date = (self.updated_at or self.created_at)[:10]
+        return f"📝 {self.title}{tags_str}\n{self.content}\n📅 Updated: {updated_date}"

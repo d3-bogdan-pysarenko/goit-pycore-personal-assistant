@@ -102,14 +102,9 @@ def search_notes(args: List[str], notebook: Notebook) -> str:
     if not matching_notes:
         return f"No notes found containing '{keyword}'."
     
-    result = [f"Found {len(matching_notes)} note(s) containing '{keyword}':\n"]
-    result.append("=" * 70)
-    
-    for note in matching_notes:
-        result.append(f"\n{note}")
-        result.append("-" * 70)
-    
-    return "\n".join(result)
+    header = f"Found {len(matching_notes)} note(s) containing '{keyword}':\n\n"
+    body = "\n\n".join(str(note) for note in matching_notes)
+    return header + body
 
 
 @input_error
@@ -129,14 +124,9 @@ def show_all_notes(args: List[str], notebook: Notebook) -> str:
     if not notes:
         return "No notes found. Add your first note with: add-note <title> <content>"
     
-    result = [f"All Notes ({len(notes)} total):\n"]
-    result.append("=" * 70)
-    
-    for note in notes:
-        result.append(f"\n{note}")
-        result.append("-" * 70)
-    
-    return "\n".join(result)
+    header = f"All Notes ({len(notes)} total):\n\n"
+    body = "\n\n".join(str(note) for note in notes)
+    return header + body
 
 
 def register_note_commands(commands):

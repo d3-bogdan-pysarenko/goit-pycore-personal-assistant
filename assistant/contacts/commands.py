@@ -9,6 +9,7 @@ Functions:
 - add_birthday()
 - show_birthday()
 - birthdays()
+- delete_contact()
 - etc.
 
 Responsibilities:
@@ -20,6 +21,7 @@ Responsibilities:
 from assistant.commands_enum import Command
 from assistant.core import input_error
 from assistant.contacts.record import Record
+from assistant.contacts.utils import format_contact
 
 
 @input_error
@@ -61,10 +63,8 @@ def show_phone(args, book):
     record = book.find(name)
     if not record:
         return "Contact not found."
-    if not record.phones:
-        return f"{name}: no phone numbers"
-    phones = "; ".join(p.value for p in record.phones)
-    return f"{name}: {phones}"
+    # Always show in formatted block; show only the requested field
+    return format_contact(record, include_fields=["phones"])
 
 
 @input_error
@@ -72,7 +72,8 @@ def show_all(args, book):
     """Display all contacts in the address book."""
     if not book.data:
         return "The contact list is empty."
-    return "\n".join(str(record) for record in book.data.values())
+    blocks = [format_contact(record) for record in book.data.values()]
+    return "\n\n".join(blocks)
 
 
 @input_error
@@ -96,9 +97,10 @@ def show_birthday(args, book):
         return "Usage: show-birthday [name]"
     name = args[0]
     record = book.find(name)
-    if not record or not record.birthday:
-        return "Birthday not found."
-    return f"{name}: {record.birthday.value.strftime('%d.%m.%Y')}"
+    if not record:
+        return "Contact not found."
+    # Show formatted block with only birthday; if absent, shows "not specified"
+    return format_contact(record, include_fields=["birthday"])
 
 
 @input_error
@@ -111,7 +113,15 @@ def birthdays(args, book):
     if not result:
         suffix = "day" if window == 1 else "days"
         return f"No birthdays within the next {window} {suffix}."
-    return "\n".join(f"{name}: {date}" for name, date in result.items())
+    blocks = []
+    for name, date in result.items():
+        rec = book.find(name)
+        if rec:
+            blocks.append(format_contact(rec, include_fields=["birthday"], birthday_override=date))
+        else:
+            # Fallback in case of mismatch
+            blocks.append(f"{name}: {date}")
+    return "\n\n".join(blocks)
 
 
 @input_error
@@ -142,6 +152,21 @@ def add_address(args, book):
     record.add_address(address)
     return f"Address for {name} has been added."
 
+
+@input_error
+def delete_contact(args, book):
+    """Delete a contact by name.
+
+    Usage: delete-contact [name]
+    """
+    if len(args) != 1:
+        return "Usage: delete-contact [name]"
+    name = args[0]
+    deleted = book.delete(name)
+    if deleted:
+        return f"Contact {name} deleted."
+    return "Contact not found."
+
 @input_error
 def search_contacts(args, book):
     """Search contacts by name, phone, email, or address.
@@ -169,7 +194,8 @@ def search_contacts(args, book):
 
     if not matches:
         return f"No contacts matched '{query}'."
-    return "\n".join(str(c) for c in matches)
+    blocks = [format_contact(c) for c in matches]
+    return "\n\n".join(blocks)
 
 
 def register_contact_commands(commands):
@@ -184,3 +210,4 @@ def register_contact_commands(commands):
     commands[Command.Contacts.SEARCH] = search_contacts
     commands[Command.Contacts.ADD_EMAIL] = add_email
     commands[Command.Contacts.ADD_ADDRESS] = add_address
+    commands[Command.Contacts.DELETE] = delete_contact
