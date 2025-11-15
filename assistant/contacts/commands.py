@@ -22,6 +22,7 @@ from assistant.commands_enum import Command
 from assistant.core import input_error
 from assistant.contacts.record import Record
 from assistant.contacts.utils import format_contact
+from assistant.validators.fields import validate_email
 
 
 @input_error
@@ -132,6 +133,10 @@ def add_email(args, book):
     """Add an email to a contact."""
     if len(args) != 2:
         return "Usage: add-email [name] [email]"
+    if not validate_email(args[1]):
+        return (
+            "Invalid email address. Please try again with a valid email address."
+        )
     name, email = args
     record = book.find(name)
     if not record:
